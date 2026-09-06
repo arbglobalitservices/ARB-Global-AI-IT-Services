@@ -296,6 +296,47 @@
 .whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border: 1px solid rgba(120,235,175,.37); color: #a2f2c8; background: rgba(93,221,155,.07); font: 600 10px var(--app-font-mono); text-decoration: none; transition: .2s ease; }
 .whatsapp-btn:hover { background: rgba(93,221,155,.15); }
 .modal-disclaimer { padding: 0 29px 24px; color: #5c7783; font: 9px var(--app-font-mono); }
+.customer-form { padding: 0 29px 5px; }
+.customer-form-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
+.customer-form-heading > span:last-child { color: #708b97; font: 9px var(--app-font-mono); }
+.customer-fields { display: grid; grid-template-columns: 1.1fr 1.2fr 1fr; gap: 10px; }
+.customer-fields label { display: grid; gap: 6px; color: #87a4ae; font: 9px var(--app-font-mono); text-transform: uppercase; letter-spacing: .08em; }
+.customer-fields input { width: 100%; padding: 11px 10px; border: 1px solid rgba(146,200,213,.18); outline: none; color: #e8f7f8; background: rgba(3,12,22,.72); font: 11px var(--app-font-mono); }
+.customer-fields input:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 2px rgba(98,200,255,.1); }
+.customer-fields input::placeholder { color: #4f6a77; }
+.cashfree-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
+.cashfree-btn:disabled { cursor: wait; opacity: .7; }
+.payment-error { margin: 10px 0 0; color: #ff9fae; font: 10px/1.5 var(--app-font-mono); }
+.bank-loading { color: #849ba5; }
+.spin { animation: spin .9s linear infinite; }
+.payment-notice { position: fixed; z-index: 70; top: 102px; left: 50%; display: flex; align-items: center; gap: 16px; width: min(680px, calc(100% - 28px)); transform: translateX(-50%); padding: 14px 16px; border: 1px solid rgba(98,200,255,.3); background: rgba(5,15,28,.96); box-shadow: 0 16px 50px rgba(0,0,0,.32); backdrop-filter: blur(12px); }
+.payment-notice.success { border-color: rgba(120,235,175,.42); }
+.payment-notice.error { border-color: rgba(255,178,102,.42); }
+.payment-notice > div { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.payment-notice strong { color: #edfaff; font: 600 13px 'Space Grotesk'; }
+.payment-notice span { color: #8da8b4; font: 10px/1.5 var(--app-font-mono); }
+.payment-notice button { flex: 0 0 auto; padding: 8px 11px; border: 1px solid rgba(98,200,255,.42); color: var(--brand-blue); background: transparent; font: 10px var(--app-font-mono); cursor: pointer; }
+.payment-notice button:hover { color: var(--brand-ink); background: var(--brand-blue); }
+.payment-notice .notice-close { display: grid; place-items: center; padding: 5px; border: 0; color: #728e99; }
+.payment-notice .notice-close:hover { color: #effbfc; background: transparent; }
+.chat-assistant { position: fixed; z-index: 75; right: 22px; bottom: 22px; display: grid; justify-items: end; gap: 10px; }
+.chat-launcher { display: inline-flex; align-items: center; gap: 8px; padding: 12px 15px; border: 1px solid rgba(98,200,255,.44); color: var(--brand-ink); background: var(--brand-blue); box-shadow: 0 12px 36px rgba(0,0,0,.34), 0 0 24px rgba(98,200,255,.16); font: 600 10px var(--app-font-mono); cursor: pointer; }
+.chat-launcher:hover { background: #a7ddff; }
+.chat-panel { display: grid; grid-template-rows: auto minmax(200px, 320px) auto; width: min(370px, calc(100vw - 28px)); overflow: hidden; border: 1px solid rgba(98,200,255,.3); background: rgba(5,14,28,.97); box-shadow: 0 24px 80px rgba(0,0,0,.52); animation: modal-in .22s ease both; }
+.chat-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; padding: 16px 17px; border-bottom: 1px solid rgba(146,200,213,.13); background: linear-gradient(130deg, rgba(98,200,255,.1), rgba(200,140,255,.07)); }
+.chat-head strong { display: block; margin-top: 7px; color: #effbfc; font: 600 16px 'Space Grotesk'; }
+.chat-close { display: grid; place-items: center; border: 0; color: #83a3ae; background: transparent; cursor: pointer; }
+.chat-close:hover { color: var(--brand-blue); }
+.chat-messages { display: flex; flex-direction: column; gap: 10px; overflow: auto; padding: 15px; }
+.chat-bubble { max-width: 88%; padding: 10px 11px; color: #c5dbe0; font: 11px/1.55 var(--app-font-mono); white-space: pre-wrap; }
+.chat-bubble.assistant { align-self: start; border: 1px solid rgba(98,200,255,.17); background: rgba(98,200,255,.06); }
+.chat-bubble.user { align-self: end; border: 1px solid rgba(200,140,255,.22); color: #eee9ff; background: rgba(200,140,255,.1); }
+.chat-form { display: flex; gap: 8px; padding: 11px; border-top: 1px solid rgba(146,200,213,.13); }
+.chat-form input { min-width: 0; flex: 1; padding: 10px; border: 1px solid rgba(146,200,213,.18); outline: none; color: #e8f7f8; background: rgba(3,12,22,.82); font: 11px var(--app-font-mono); }
+.chat-form input:focus { border-color: var(--brand-blue); }
+.chat-form button { display: grid; place-items: center; width: 37px; border: 1px solid var(--brand-blue); color: var(--brand-ink); background: var(--brand-blue); cursor: pointer; }
+.chat-form button:disabled { cursor: not-allowed; opacity: .45; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Brand palette sampled from the supplied ARB Global artwork:
    midnight navy, holographic violet, electric blue, and soft lavender. */
@@ -395,4 +436,11 @@ html, body, .site-shell { background: var(--brand-ink); }
   .payment-options { grid-template-columns: 1fr; padding-left: 16px; padding-right: 16px; }
   .modal-head { padding-left: 16px; padding-right: 16px; }
   .modal-disclaimer { padding-left: 16px; padding-right: 16px; }
+  .customer-form { padding-left: 16px; padding-right: 16px; }
+  .customer-form-heading { align-items: start; flex-direction: column; gap: 7px; }
+  .customer-fields { grid-template-columns: 1fr; }
+  .payment-notice { top: 88px; align-items: start; flex-wrap: wrap; }
+  .payment-notice .notice-close { position: absolute; top: 6px; right: 5px; }
+  .payment-notice > div { padding-right: 14px; }
+  .chat-assistant { right: 14px; bottom: 14px; }
 }

@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -9,6 +9,7 @@ import {
   Activity,
   ArrowRight,
   ArrowUpRight,
+  Bot,
   BrainCircuit,
   Building2,
   Check,
@@ -19,12 +20,14 @@ import {
   Database,
   Landmark,
   LockKeyhole,
+  LoaderCircle,
   Mail,
   Menu,
   MessageCircle,
   Network,
   Phone,
   ShieldCheck,
+  Send,
   Smartphone,
   Sparkles,
   X,
@@ -130,6 +133,17 @@ const formatINR = (amount: number) =>
 
 const formatUSD = (amount: number) =>
   `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(amount / 84))}`;
+
+const apiUrl = (path: string) =>
+  `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}`;
+
+declare global {
+  interface Window {
+    Cashfree?: (options: { mode: 'sandbox' | 'production' }) => {
+      checkout: (options: { paymentSessionId: string; redirectTarget: '_self' | '_blank' }) => Promise<unknown>;
+    };
+  }
+}
 
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -707,7 +721,27 @@ function ThreeGlobeScene() {
   );
 }
 
+type BankDetails = {
+  bankName: string;
+  accountName: string;
+  routingNumber: string;
+  accountNumber: string;
+  swiftCode: string;
+};
+
+type CustomerDetails = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
 function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
+  const [customer, setCustomer] = useState<CustomerDetails>({ name: '', email: '', phone: '' });
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
+  const [bankError, setBankError] = useState('');
+  const [paymentError, setPaymentError] = useState('');
+  const [paymentState, setPaymentState] = useState<'idle' | 'loading' | 'redirecting'>('idle');
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -716,7 +750,66 @@ function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
 
+  useEffect(() => {
+    let active = true;
+    fetch(apiUrl('/api/payment/bank-details'))
+      .then(async (response) => {
+        const data = await response.json() as BankDetails & { message?: string };
+        if (!response.ok) throw new Error(data.message || 'Bank transfer details are unavailable.');
+        if (active) setBankDetails(data);
+      })
+      .catch((error: unknown) => {
+        if (active) setBankError(error instanceof Error ? error.message : 'Bank transfer details are unavailable.');
+      });
+    return () => { active = false; };
+  }, []);
+
   const advance = Math.round(plan.price / 2);
+  const updateCustomer = (field: keyof CustomerDetails, value: string) => {
+    setCustomer((current) => ({ ...current, [field]: value }));
+    setPaymentError('');
+  };
+
+  const startCashfree = async () => {
+    if (!customer.name.trim() || !customer.email.trim() || !customer.phone.trim()) {
+      setPaymentError('Please enter your name, email, and phone number before checkout.');
+      return;
+    }
+    setPaymentState('loading');
+    setPaymentError('');
+    try {
+      const response = await fetch(apiUrl('/api/payment/cashfree/order'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: plan.id,
+          customer,
+          returnUrl: window.location.href.split('?')[0],
+        }),
+      });
+      const data = await response.json() as { paymentSessionId?: string; message?: string };
+      if (!response.ok || !data.paymentSessionId) {
+        throw new Error(data.message || 'Unable to start Cashfree checkout.');
+      }
+      if (!window.Cashfree) {
+        throw new Error('Cashfree checkout is still loading. Please wait a moment and retry.');
+      }
+      setPaymentState('redirecting');
+      const checkoutResult = await window.Cashfree({ mode: 'production' }).checkout({
+        paymentSessionId: data.paymentSessionId,
+        redirectTarget: '_self',
+      });
+      if (checkoutResult && typeof checkoutResult === 'object' && 'error' in checkoutResult) {
+        const error = checkoutResult as { error?: { message?: string } };
+        throw new Error(error.error?.message || 'Cashfree checkout was cancelled.');
+      }
+      setPaymentState('idle');
+    } catch (error: unknown) {
+      setPaymentState('idle');
+      setPaymentError(error instanceof Error ? error.message : 'Unable to start Cashfree checkout.');
+    }
+  };
+
   return (
     <div
       className="modal-backdrop"
@@ -737,13 +830,23 @@ function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
           <div className="summary-cell"><span>50% advance today</span><strong className="gold">{formatINR(advance)}</strong></div>
           <div className="summary-cell"><span>Balance after kickoff</span><strong>{formatINR(advance)}</strong></div>
         </div>
+        <div className="customer-form">
+          <div className="customer-form-heading"><span className="eyebrow">CHECKOUT DETAILS</span><span>Used only to create your secure order.</span></div>
+          <div className="customer-fields">
+            <label><span>Your name</span><input value={customer.name} onChange={(event) => updateCustomer('name', event.target.value)} placeholder="Abodh Raj Bhar" autoComplete="name" /></label>
+            <label><span>Email</span><input type="email" value={customer.email} onChange={(event) => updateCustomer('email', event.target.value)} placeholder="you@company.com" autoComplete="email" /></label>
+            <label><span>Phone</span><input type="tel" value={customer.phone} onChange={(event) => updateCustomer('phone', event.target.value)} placeholder="+91 8127968129" autoComplete="tel" /></label>
+          </div>
+        </div>
         <div className="payment-options">
           <div className="payment-option primary-option">
             <div className="option-title"><CircleDollarSign size={18} /> Cashfree checkout</div>
             <p className="option-description">Secure online checkout. Choose the method that works for your finance team.</p>
-            <button className="cashfree-btn" data-testid="button-cashfree-payment" onClick={() => window.alert(`Redirecting to Cashfree secure checkout for ${plan.name}`)}>
-              Pay Now Rs {new Intl.NumberFormat('en-IN').format(advance)} via Cashfree
+            <button className="cashfree-btn" data-testid="button-cashfree-payment" onClick={startCashfree} disabled={paymentState !== 'idle'}>
+              {paymentState === 'loading' && <LoaderCircle size={14} className="spin" />}
+              {paymentState === 'redirecting' ? 'Opening secure checkout…' : paymentState === 'loading' ? 'Creating secure order…' : `Pay Now Rs ${new Intl.NumberFormat('en-IN').format(advance)} via Cashfree`}
             </button>
+            {paymentError && <p className="payment-error" role="alert">{paymentError}</p>}
             <div className="method-labels" aria-label="Available Cashfree methods">
               <span><Smartphone size={11} /> UPI</span>
               <span><Zap size={11} /> GPay</span>
@@ -755,15 +858,19 @@ function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
           </div>
           <div className="payment-option">
             <div className="option-title"><Building2 size={18} /> ACH bank transfer</div>
-            <p className="option-description">Prefer a direct transfer? Use the bank details from your final proposal and share your confirmation.</p>
-            <div className="bank-details" aria-label="Bank transfer details">
-              <div><b>Bank</b> [Your Bank Name]</div>
-              <div><b>Account name</b> ARB Global IT Services</div>
-              <div><b>ACH routing number</b> [Put your number]</div>
-              <div><b>Account number</b> [Put your number]</div>
-              <div><b>SWIFT</b> [Code]</div>
-              <div><b>Reference</b> {plan.name.toUpperCase().replaceAll(' ', '-')} · {formatINR(advance)}</div>
-            </div>
+            <p className="option-description">Prefer a direct transfer? Use these secure bank details and share your confirmation.</p>
+            {bankDetails ? (
+              <div className="bank-details" aria-label="Bank transfer details">
+                <div><b>Bank</b> {bankDetails.bankName}</div>
+                <div><b>Account name</b> {bankDetails.accountName}</div>
+                <div><b>ACH routing number</b> {bankDetails.routingNumber}</div>
+                <div><b>Account number</b> {bankDetails.accountNumber}</div>
+                <div><b>SWIFT</b> {bankDetails.swiftCode}</div>
+                <div><b>Reference</b> {plan.name.toUpperCase().replaceAll(' ', '-')} · {formatINR(advance)}</div>
+              </div>
+            ) : (
+              <div className="bank-details bank-loading">{bankError || 'Loading bank transfer details…'}</div>
+            )}
             <a className="whatsapp-btn" href="https://wa.me/918127968129" target="_blank" rel="noreferrer" data-testid="link-transfer-whatsapp">
               <MessageCircle size={15} /> I Transferred - Send on WhatsApp
             </a>
@@ -796,16 +903,168 @@ function Header({ onOpenMenu, menuOpen }: { onOpenMenu: () => void; menuOpen: bo
   );
 }
 
+type ChatEntry = { role: 'user' | 'assistant'; content: string };
+
+function ChatAssistant() {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [messages, setMessages] = useState<ChatEntry[]>([
+    { role: 'assistant', content: 'Hi — I’m the ARB Global assistant. Ask me about services, plans, pricing, payments, or the best next step for your project.' },
+  ]);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, open]);
+
+  const sendMessage = async (event: FormEvent) => {
+    event.preventDefault();
+    const content = draft.trim();
+    if (!content || sending) return;
+    const history = messages.slice(-10);
+    const userEntry: ChatEntry = { role: 'user', content };
+    const assistantEntry: ChatEntry = { role: 'assistant', content: '' };
+    setDraft('');
+    setSending(true);
+    setMessages((current) => [...current, userEntry, assistantEntry]);
+
+    try {
+      const response = await fetch(apiUrl('/api/chat'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        body: JSON.stringify({ message: content, history }),
+      });
+      if (!response.ok || !response.body) {
+        const data = await response.json().catch(() => ({})) as { message?: string };
+        throw new Error(data.message || 'The assistant could not respond.');
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finished = false;
+      while (!finished) {
+        const chunk = await reader.read();
+        buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        for (const eventBlock of events) {
+          const line = eventBlock.split('\n').find((item) => item.startsWith('data: '));
+          if (!line) continue;
+          const eventData = JSON.parse(line.slice(6)) as { content?: string; error?: string; done?: boolean };
+          if (eventData.content) {
+            setMessages((current) => {
+              const next = [...current];
+              const last = next[next.length - 1];
+              if (last?.role === 'assistant') next[next.length - 1] = { ...last, content: last.content + eventData.content };
+              return next;
+            });
+          }
+          if (eventData.error) {
+            setMessages((current) => {
+              const next = [...current];
+              const last = next[next.length - 1];
+              if (last?.role === 'assistant') next[next.length - 1] = { ...last, content: eventData.error || '' };
+              return next;
+            });
+          }
+          if (eventData.done) finished = true;
+        }
+        if (chunk.done) finished = true;
+      }
+    } catch (error: unknown) {
+      setMessages((current) => {
+        const next = [...current];
+        const last = next[next.length - 1];
+        if (last?.role === 'assistant') next[next.length - 1] = {
+          ...last,
+          content: error instanceof Error ? error.message : 'Please contact ARB Global on WhatsApp for a fast response.',
+        };
+        return next;
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className={`chat-assistant${open ? ' is-open' : ''}`}>
+      {open && (
+        <section className="chat-panel" aria-label="ARB Global AI assistant">
+          <div className="chat-head">
+            <div><span className="eyebrow">ARB / AI SUPPORT</span><strong>Ask ARB Global</strong></div>
+            <button className="chat-close" onClick={() => setOpen(false)} aria-label="Close assistant"><X size={16} /></button>
+          </div>
+          <div className="chat-messages" aria-live="polite">
+            {messages.map((message, index) => (
+              <div className={`chat-bubble ${message.role}`} key={`${message.role}-${index}`}>
+                {message.content || (sending && index === messages.length - 1 ? <LoaderCircle size={14} className="spin" /> : '')}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <form className="chat-form" onSubmit={sendMessage}>
+            <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask about plans or services…" aria-label="Message ARB Global assistant" maxLength={2000} />
+            <button type="submit" disabled={sending || !draft.trim()} aria-label="Send message"><Send size={15} /></button>
+          </form>
+        </section>
+      )}
+      <button className="chat-launcher" onClick={() => setOpen((current) => !current)} aria-label={open ? 'Close ARB Global assistant' : 'Open ARB Global assistant'} data-testid="button-open-chat">
+        {open ? <X size={19} /> : <Bot size={19} />}<span>{open ? 'Close' : 'Ask ARB'}</span>
+      </button>
+    </div>
+  );
+}
+
 function Home() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const openPlan = (plan: Plan) => setSelectedPlan(plan);
+  const [paymentNotice, setPaymentNotice] = useState<{ kind: 'success' | 'error'; title: string; text: string; planId?: string } | null>(null);
+  const openPlan = (plan: Plan) => {
+    setPaymentNotice(null);
+    setSelectedPlan(plan);
+  };
   const closeModal = () => setSelectedPlan(null);
   const nav = (id: string) => { scrollToId(id); setMenuOpen(false); };
+
+  useEffect(() => {
+    const orderId = new URLSearchParams(window.location.search).get('cashfree_order_id');
+    if (!orderId) return;
+    const planId = orderId.split('_')[1]?.toUpperCase();
+    let active = true;
+    fetch(apiUrl(`/api/payment/cashfree/status/${encodeURIComponent(orderId)}`))
+      .then(async (response) => {
+        const data = await response.json() as { status?: string; message?: string };
+        if (!response.ok) throw new Error(data.message || 'Unable to verify payment.');
+        if (!active) return;
+        if (data.status === 'PAID') {
+          setPaymentNotice({ kind: 'success', title: 'Advance received', text: 'Your Cashfree payment was successful. The ARB Global team will contact you with the next steps.', planId });
+        } else {
+          setPaymentNotice({ kind: 'error', title: 'Payment not completed', text: 'Cashfree did not mark this order as paid. You can retry the advance or use ACH transfer below.', planId });
+        }
+      })
+      .catch(() => {
+        if (active) setPaymentNotice({ kind: 'error', title: 'Payment status pending', text: 'We could not verify this order yet. Please retry shortly or contact ARB Global on WhatsApp.', planId });
+      })
+      .finally(() => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className="site-shell" id="top">
       <div className="noise" />
       <Header onOpenMenu={() => setMenuOpen((current) => !current)} menuOpen={menuOpen} />
+      {paymentNotice && (
+        <div className={`payment-notice ${paymentNotice.kind}`} role="status">
+          <div><strong>{paymentNotice.title}</strong><span>{paymentNotice.text}</span></div>
+          {paymentNotice.kind === 'error' && paymentNotice.planId && plans.find((plan) => plan.id === paymentNotice.planId) && (
+            <button onClick={() => openPlan(plans.find((plan) => plan.id === paymentNotice.planId) as Plan)}>Retry payment</button>
+          )}
+          <button className="notice-close" onClick={() => setPaymentNotice(null)} aria-label="Dismiss payment status"><X size={15} /></button>
+        </div>
+      )}
       {menuOpen && (
         <div style={{ position: 'fixed', zIndex: 35, top: 66, left: 0, right: 0, padding: 22, borderBottom: '1px solid rgba(133,167,185,.15)', background: 'rgba(2,6,23,.97)' }}>
           {['capabilities', 'portfolio', 'infrastructure', 'plans', 'contact'].map((item) => (
@@ -906,6 +1165,7 @@ function Home() {
         </div>
       </footer>
       {selectedPlan && <PaymentModal plan={selectedPlan} onClose={closeModal} />}
+      <ChatAssistant />
     </div>
   );
 }
