@@ -1,1 +1,2 @@
 - [Preview WebGL fallback](preview-webgl.md) — The hosted preview may lack WebGL; Three.js scenes need a capability check and graceful fallback.
+- [AI provider fallback](ai-provider-fallback.md) — If managed OpenAI access is unavailable, direct API access needs a user-owned key and credits; keep startup and chat failure graceful.
