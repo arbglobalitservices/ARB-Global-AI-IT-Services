@@ -1016,6 +1016,19 @@ function ChatAssistant() {
   );
 }
 
+function HeroSection() {
+  return (
+    <section className="hero-banner" aria-labelledby="hero-banner-heading" data-testid="hero-banner">
+      <div className="hero-banner-inner">
+        <h2 id="hero-banner-heading">
+          ARB Global AI &amp; IT Services.<span className="hero-banner-dot" aria-hidden="true">•</span>
+        </h2>
+        <p>Abodh Raj Bhar | Global Artificial Intelligence &amp; Information of Technology Services</p>
+      </div>
+    </section>
+  );
+}
+
 function Home() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -1093,6 +1106,8 @@ function Home() {
           <ThreeGlobeScene />
           <div className="hero-bottomline" />
         </section>
+
+        <HeroSection />
 
         <section className="section services-section" id="capabilities" aria-labelledby="capabilities-heading">
           <div className="container-x">
