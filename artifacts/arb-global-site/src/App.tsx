@@ -134,8 +134,13 @@ const formatINR = (amount: number) =>
 const formatUSD = (amount: number) =>
   `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(amount / 84))}`;
 
-const apiUrl = (path: string) =>
-  `${import.meta.env.BASE_URL.replace(/\/$/, '')}${path}`;
+// Direct Render Backend API URL
+const BACKEND_API_BASE = 'https://arb-global-ai-it-services.onrender.com';
+
+const apiUrl = (path: string) => {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BACKEND_API_BASE}${cleanPath}`;
+};
 
 declare global {
   interface Window {
@@ -752,7 +757,7 @@ function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
 
   useEffect(() => {
     let active = true;
-    fetch(apiUrl('/api/payment/bank-details'))
+    fetch(apiUrl('/payment/bank-details'))
       .then(async (response) => {
         const data = await response.json() as BankDetails & { message?: string };
         if (!response.ok) throw new Error(data.message || 'Bank transfer details are unavailable.');
@@ -778,7 +783,7 @@ function PaymentModal({ plan, onClose }: { plan: Plan; onClose: () => void }) {
     setPaymentState('loading');
     setPaymentError('');
     try {
-      const response = await fetch(apiUrl('/api/payment/cashfree/order'), {
+      const response = await fetch(apiUrl('/payment/cashfree/order'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1045,7 +1050,7 @@ function Home() {
     if (!orderId) return;
     const planId = orderId.split('_')[1]?.toUpperCase();
     let active = true;
-    fetch(apiUrl(`/api/payment/cashfree/status/${encodeURIComponent(orderId)}`))
+    fetch(apiUrl(`/payment/cashfree/status/${encodeURIComponent(orderId)}`))
       .then(async (response) => {
         const data = await response.json() as { status?: string; message?: string };
         if (!response.ok) throw new Error(data.message || 'Unable to verify payment.');
