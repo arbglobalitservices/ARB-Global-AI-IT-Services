@@ -135,7 +135,7 @@ const formatUSD = (amount: number) =>
   `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(amount / 84))}`;
 
 // Direct Render Backend API URL
-const BACKEND_API_BASE = 'https://arb-global-ai-it-services.onrender.com';
+const BACKEND_API_BASE = 'https://arb-global-ai-it-services.onrender.com/api'
 
 const apiUrl = (path: string) => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
