@@ -18,6 +18,7 @@ import {
   Cloud,
   CreditCard,
   Database,
+  Globe2,
   Landmark,
   LockKeyhole,
   LoaderCircle,
@@ -134,7 +135,6 @@ const formatINR = (amount: number) =>
 const formatUSD = (amount: number) =>
   `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(amount / 84))}`;
 
-// Direct Render Backend API URL
 const BACKEND_API_BASE = 'https://arb-global-ai-it-services.onrender.com/api';
 
 const apiUrl = (path: string) => {
@@ -152,6 +152,233 @@ declare global {
 
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function LegalPolicyModal({
+  type,
+  onClose,
+}: {
+  type: 'terms' | 'privacy' | 'refund' | null;
+  onClose: () => void;
+}) {
+  if (!type) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(2, 6, 23, 0.88)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'linear-gradient(180deg, #0b1120 0%, #030712 100%)',
+          border: '1px solid rgba(168, 85, 247, 0.35)',
+          borderRadius: '16px',
+          maxWidth: '740px',
+          width: '100%',
+          maxHeight: '88vh',
+          overflowY: 'auto',
+          padding: '28px',
+          color: '#e2e8f0',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(168, 85, 247, 0.15)',
+          position: 'relative',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+            borderBottom: '1px solid rgba(148, 163, 184, 0.15)',
+            paddingBottom: '14px',
+          }}
+        >
+          <div>
+            <span
+              style={{
+                font: '10px var(--app-font-mono, monospace)',
+                color: '#a855f7',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: '4px',
+              }}
+            >
+              LEGAL COMPLIANCE &amp; GOVERNANCE DESK
+            </span>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ffffff', fontWeight: 700 }}>
+              {type === 'terms' && 'Terms of Service (Govt of India & Global B2B Standards)'}
+              {type === 'privacy' && 'Privacy Policy & Data Protection (DPDP Act 2023 & GDPR EU)'}
+              {type === 'refund' && 'Milestone Delivery, Cancellation & Refund Policy'}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Close modal"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ fontSize: '0.88rem', lineHeight: '1.75', color: '#cbd5e1' }}>
+          {type === 'terms' && (
+            <>
+              <p>
+                <strong>1. Corporate Identity &amp; Legal Framework:</strong> ARB Global AI &amp; IT Services (Founder: Abodh Raj Bhar) is an enterprise technology provider governed by the <strong>Information Technology Act, 2000 (India)</strong>, the <strong>Indian Contract Act, 1872</strong>, and international trade laws regulating global software export and artificial intelligence services. All contractual obligations are subject to the exclusive jurisdiction of the competent courts of Uttar Pradesh, India.
+              </p>
+              <p>
+                <strong>2. Engagement Kickoff &amp; Milestone Billing:</strong> All bespoke software development, AI model integrations, and cloud architectures require a <strong>strict 50% booking advance</strong> prior to sprint kick-off. The final 50% balance must be settled upon delivery of the User Acceptance Testing (UAT) milestone prior to production release or domain pointing.
+              </p>
+              <p>
+                <strong>3. Intellectual Property (IP) Transfer:</strong> Upon clearance of 100% project invoice payments, full intellectual property rights, database schemas, API connectors, custom LLM fine-tuning scripts, and production code repositories transfer unconditionally to the client.
+              </p>
+              <p>
+                <strong>4. Service Level Agreements (SLA):</strong> Plans 8–15 include dedicated engineering support and SLA monitoring ensuring up to 99.9% uptime for deployed infrastructure and enterprise cloud clusters.
+              </p>
+            </>
+          )}
+
+          {type === 'privacy' && (
+            <>
+              <p>
+                <strong>1. Statutory Data Governance:</strong> In compliance with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act - Govt of India)</strong> and the <strong>EU General Data Protection Regulation (GDPR)</strong>, we process customer personal data only for project execution, secure order routing, and communication purposes.
+              </p>
+              <p>
+                <strong>2. Non-Disclosure Obligations (NDA):</strong> Every client system, proprietary business workflow, user database, API credentials, and trade secrets shared with ARB Global are protected under strict non-disclosure covenants and will never be shared, sold, or exposed to third parties.
+              </p>
+              <p>
+                <strong>3. Payment &amp; Financial Security:</strong> Financial transactions are mediated via PCI-DSS Level 1 certified gateways (Cashfree Payments India) and authorized banking networks (ACH). ARB Global servers maintain zero storage of credit card numbers, CVVs, or online banking secrets.
+              </p>
+              <p>
+                <strong>4. Cryptographic Edge Defense:</strong> All incoming and outgoing data transfers are shielded by 256-bit TLS/SSL encryption, automated DDOS mitigation, and Cloudflare WAF protection.
+              </p>
+            </>
+          )}
+
+          {type === 'refund' && (
+            <>
+              <p>
+                <strong>1. Kickoff Advance Policy:</strong> Dedicated cloud nodes, senior software engineers, and development sprint allocations are reserved immediately upon payment receipt. Consequently, the <strong>50% initiation advance is non-refundable</strong> once engineering sprint scoping has commenced.
+              </p>
+              <p>
+                <strong>2. Milestone Remediation Guarantee:</strong> In the rare event that a completed sprint does not match the specifications signed in the project scope document, ARB Global commits to iterative revisions at zero additional billing until the deliverable complies with contractual requirements.
+              </p>
+              <p>
+                <strong>3. Pre-Kickoff Cancellation:</strong> Cancellations initiated in writing prior to engineer allocation are eligible for a full refund minus applicable payment gateway bank charges within 7–10 business days.
+              </p>
+              <p>
+                <strong>4. Third-Party Infrastructure Licenses:</strong> Domain name purchases, third-party server hosting clusters, and proprietary API compute charges disbursed to external vendors are governed by those specific vendor terms and are strictly non-refundable.
+              </p>
+            </>
+          )}
+        </div>
+
+        <div
+          style={{
+            marginTop: '26px',
+            paddingTop: '16px',
+            borderTop: '1px solid rgba(148, 163, 184, 0.15)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            REGULATORY DESK · IT ACT 2000 | DPDP ACT 2023 | GDPR COMPLIANT
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#ffffff',
+              padding: '8px 22px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(168, 85, 247, 0.3)',
+            }}
+          >
+            Acknowledge &amp; Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CookieNotice({ onAccept }: { onAccept: () => void }) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '20px',
+        right: '20px',
+        maxWidth: '520px',
+        margin: '0 auto',
+        backgroundColor: 'rgba(10, 15, 30, 0.95)',
+        border: '1px solid rgba(168, 85, 247, 0.4)',
+        borderRadius: '12px',
+        padding: '14px 18px',
+        zIndex: 9000,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '14px',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+        We use essential cookies and DPDP-compliant telemetry to deliver secure, encrypted international payment workflows.
+      </div>
+      <button
+        onClick={onAccept}
+        style={{
+          background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '6px',
+          padding: '6px 14px',
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        Got it
+      </button>
+    </div>
+  );
 }
 
 function GlobeScene() {
@@ -383,7 +610,7 @@ function GlobeScene() {
           event.currentTarget.setPointerCapture(event.pointerId);
         }}
         onPointerUp={(event) => {
-          dragRef.current.active = false;
+          dragRef.current = false;
           event.currentTarget.releasePointerCapture(event.pointerId);
         }}
       />
@@ -680,7 +907,7 @@ function ThreeGlobeScene() {
       canvas.setPointerCapture(event.pointerId);
     };
     const onPointerUp = (event: PointerEvent) => {
-      dragRef.current.active = false;
+      dragRef.current = false;
       if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
     };
     const onPointerLeave = () => {
@@ -893,37 +1120,37 @@ function Header({ onOpenMenu, menuOpen }: { onOpenMenu: () => void; menuOpen: bo
     <header className="topbar">
       <div className="container-x" style={{ display: 'flex', alignItems: 'center', width: 'min(1180px, calc(100% - 40px))' }}>
         <button 
-  className="brand-lockup" 
-  onClick={() => navigate('top')} 
-  aria-label="ARB Global home" 
-  data-testid="button-brand-home"
-  style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
->
-  <img className="brand-mark" src="/brand/arb-global-logo.jpg" alt="ARB Global AI & IT Services" />
-  <span style={{ 
-    fontWeight: 800, 
-    fontSize: '0.98rem', 
-    letterSpacing: '-0.02em',
-    background: 'linear-gradient(90deg, #FFFFFF 0%, #D8B4FE 45%, #C084FC 75%, #A855F7 100%)',
-    WebkitBackgroundClip: 'text',
-    backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    color: 'transparent',
-    display: 'inline-flex', 
-    alignItems: 'baseline', 
-    whiteSpace: 'nowrap' 
-  }}>
-    ARB Global AI &amp; IT Services
-    <span style={{ 
-      color: '#d946ef', 
-      WebkitTextFillColor: '#d946ef', 
-      fontWeight: 900, 
-      fontSize: '1.25rem',
-      lineHeight: '1',
-      marginLeft: '1px'
-    }}>•</span>
-  </span>
-</button>
+          className="brand-lockup" 
+          onClick={() => navigate('top')} 
+          aria-label="ARB Global home" 
+          data-testid="button-brand-home"
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          <img className="brand-mark" src="/brand/arb-global-logo.jpg" alt="ARB Global AI & IT Services" />
+          <span style={{ 
+            fontWeight: 800, 
+            fontSize: '0.98rem', 
+            letterSpacing: '-0.02em',
+            background: 'linear-gradient(90deg, #FFFFFF 0%, #D8B4FE 45%, #C084FC 75%, #A855F7 100%)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            color: 'transparent',
+            display: 'inline-flex', 
+            alignItems: 'baseline', 
+            whiteSpace: 'nowrap' 
+          }}>
+            ARB Global AI &amp; IT Services
+            <span style={{ 
+              color: '#d946ef', 
+              WebkitTextFillColor: '#d946ef', 
+              fontWeight: 900, 
+              fontSize: '1.25rem',
+              lineHeight: '1',
+              marginLeft: '1px'
+            }}>•</span>
+          </span>
+        </button>
 
         <nav className="nav-links" aria-label="Main navigation">
           <button onClick={() => navigate('capabilities')} data-testid="link-capabilities">Services</button>
@@ -1068,6 +1295,19 @@ function Home() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [paymentNotice, setPaymentNotice] = useState<{ kind: 'success' | 'error'; title: string; text: string; planId?: string } | null>(null);
+  const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | 'refund' | null>(null);
+  const [cookieAccepted, setCookieAccepted] = useState(true);
+
+  useEffect(() => {
+    const accepted = localStorage.getItem('arb_cookie_consent');
+    if (!accepted) setCookieAccepted(false);
+  }, []);
+
+  const handleCookieAccept = () => {
+    localStorage.setItem('arb_cookie_consent', 'true');
+    setCookieAccepted(true);
+  };
+
   const openPlan = (plan: Plan) => {
     setPaymentNotice(null);
     setSelectedPlan(plan);
@@ -1208,14 +1448,69 @@ function Home() {
           </div>
         </section>
       </main>
+
       <footer className="footer" id="contact">
         <div className="container-x">
-          <div className="footer-main"><div className="footer-copy"><span className="eyebrow">THE NEXT SIGNAL</span><h2>Ready when<br /><span className="gold-text">you are.</span></h2><p>Bring us the hard problem, the ambitious deadline, or the system you know should work better. ARB Global will map the right plan, stack, and next move.</p></div><div className="footer-contact"><a className="contact-item" href="https://wa.me/918127968129" target="_blank" rel="noreferrer" data-testid="link-footer-whatsapp"><MessageCircle size={16} /> WhatsApp support</a><a className="contact-item" href="tel:+918127968129" data-testid="link-footer-phone"><Phone size={16} /> +91 8127968129</a><a className="contact-item" href="mailto:arbglobalitservices@gmail.com" data-testid="link-footer-email"><Mail size={16} /> arbglobalitservices@gmail.com</a><span className="contact-item"><Sparkles size={16} /> Team will call in 60 sec</span></div></div>
-          <div className="footer-bottom"><span>© 2026 ARB GLOBAL AI &amp; IT SERVICES</span><span>AI / CLOUD / AUTONOMOUS SYSTEMS / GLOBAL DELIVERY</span></div>
+          <div className="footer-main">
+            <div className="footer-copy">
+              <span className="eyebrow">THE NEXT SIGNAL</span>
+              <h2>Ready when<br /><span className="gold-text">you are.</span></h2>
+              <p>Bring us the hard problem, the ambitious deadline, or the system you know should work better. ARB Global will map the right plan, stack, and next move.</p>
+            </div>
+            <div className="footer-contact">
+              <a className="contact-item" href="https://wa.me/918127968129" target="_blank" rel="noreferrer" data-testid="link-footer-whatsapp"><MessageCircle size={16} /> WhatsApp support</a>
+              <a className="contact-item" href="tel:+918127968129" data-testid="link-footer-phone"><Phone size={16} /> +91 8127968129</a>
+              <a className="contact-item" href="mailto:arbglobalitservices@gmail.com" data-testid="link-footer-email"><Mail size={16} /> arbglobalitservices@gmail.com</a>
+              <span className="contact-item"><Sparkles size={16} /> Team will call in 60 sec</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '18px', flexWrap: 'wrap', padding: '16px 0', borderTop: '1px solid rgba(133,167,185,.12)', fontSize: '0.75rem', color: '#94a3b8' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><ShieldCheck size={14} color="#a855f7" /> PCI-DSS Level 1 Gateway</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><LockKeyhole size={14} color="#a855f7" /> DPDP Act (India) &amp; GDPR Compliant</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Globe2 size={14} color="#a855f7" /> Global Cross-Border SLA Architecture</span>
+          </div>
+
+          <div className="footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', textAlign: 'center', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,.05)' }}>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', fontSize: '0.84rem' }}>
+              <button 
+                type="button" 
+                onClick={() => setLegalModal('terms')} 
+                style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+              >
+                Terms &amp; Conditions (Govt &amp; Global)
+              </button>
+              <span style={{ color: '#64748b' }}>•</span>
+              <button 
+                type="button" 
+                onClick={() => setLegalModal('privacy')} 
+                style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+              >
+                Privacy Policy &amp; DPDP / GDPR
+              </button>
+              <span style={{ color: '#64748b' }}>•</span>
+              <button 
+                type="button" 
+                onClick={() => setLegalModal('refund')} 
+                style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', textDecoration: 'underline', padding: 0, font: 'inherit' }}
+              >
+                Refund &amp; Cancellation Policy
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '1180px', flexWrap: 'wrap', gap: '8px', fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+              <span>© 2026 ARB GLOBAL AI &amp; IT SERVICES. ALL RIGHTS RESERVED.</span>
+              <span>JURISDICTION: INDIA | GLOBAL CROSS-BORDER ENTERPRISE COMPLIANCE</span>
+            </div>
+          </div>
         </div>
       </footer>
+
       {selectedPlan && <PaymentModal plan={selectedPlan} onClose={closeModal} />}
       <ChatAssistant />
+      <LegalPolicyModal type={legalModal} onClose={() => setLegalModal(null)} />
+      {!cookieAccepted && <CookieNotice onAccept={handleCookieAccept} />}
     </div>
   );
 }
@@ -1250,4 +1545,3 @@ function App() {
 }
 
 export default App;
-
