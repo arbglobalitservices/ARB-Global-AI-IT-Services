@@ -892,9 +892,27 @@ function Header({ onOpenMenu, menuOpen }: { onOpenMenu: () => void; menuOpen: bo
   return (
     <header className="topbar">
       <div className="container-x" style={{ display: 'flex', alignItems: 'center', width: 'min(1180px, calc(100% - 40px))' }}>
-        <button className="brand-lockup" onClick={() => navigate('top')} aria-label="ARB Global home" data-testid="button-brand-home">
-          <img className="brand-mark" src="/brand/arb-global-logo.jpg" alt="ARB Global AI & IT Services" />
-        </button>
+        <button 
+  className="brand-lockup" 
+  onClick={() => navigate('top')} 
+  aria-label="ARB Global home" 
+  data-testid="button-brand-home"
+  style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+>
+  <img className="brand-mark" src="/brand/arb-global-logo.jpg" alt="ARB Global AI & IT Services" />
+  <span style={{ 
+    fontWeight: 700, 
+    fontSize: '0.95rem', 
+    letterSpacing: '-0.02em', 
+    color: '#ffffff', 
+    display: 'inline-flex', 
+    alignItems: 'baseline', 
+    whiteSpace: 'nowrap' 
+  }}>
+    ARB Global AI &amp; IT Services<span style={{ color: '#a855f7', fontWeight: 800 }}>.</span>
+  </span>
+</button>
+
         <nav className="nav-links" aria-label="Main navigation">
           <button onClick={() => navigate('capabilities')} data-testid="link-capabilities">Services</button>
           <button onClick={() => navigate('portfolio')} data-testid="link-approach">Portfolio</button>
