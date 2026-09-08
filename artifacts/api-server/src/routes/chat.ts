@@ -1,14 +1,9 @@
 import { Router, type IRouter } from "express";
-import OpenAI from "openai";
 
 const router: IRouter = Router();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL || "https://api.groq.com/openai/v1",
-});
-
-const model = process.env.OPENAI_MODEL || "llama-3.3-70b-versatile";
+const GROQ_API_KEY = process.env.OPENAI_API_KEY || "";
+const GROQ_MODEL = process.env.OPENAI_MODEL || "llama-3.3-70b-versatile";
 
 const businessContext = `You are ARB Global's website assistant. ARB Global AI & IT Services, founded by Abodh Raj Bhar.
 
@@ -35,9 +30,11 @@ router.post("/chat", async (req, res) => {
     .filter((item: unknown): item is ChatMessage => {
       if (!item || typeof item !== "object") return false;
       const candidate = item as Record<string, unknown>;
-      return (candidate.role === "user" || candidate.role === "assistant") &&
+      return (
+        (candidate.role === "user" || candidate.role === "assistant") &&
         typeof candidate.content === "string" &&
-        candidate.content.length <= 2000;
+        candidate.content.length <= 2000
+      );
     })
     .slice(-10);
 
@@ -47,26 +44,76 @@ router.post("/chat", async (req, res) => {
   res.flushHeaders();
 
   try {
-    const stream = await openai.chat.completions.create({
-      model,
-      max_tokens: 2048,
-      stream: true,
-      messages: [
-        { role: "system", content: businessContext },
-        ...safeHistory,
-        { role: "user", content: message },
-      ],
+    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        max_tokens: 2048,
+        stream: true,
+        messages: [
+          { role: "system", content: businessContext },
+          ...safeHistory,
+          { role: "user", content: message },
+        ],
+      }),
     });
 
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content;
-      if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+    if (!groqResponse.ok || !groqResponse.body) {
+      const errText = await groqResponse.text();
+      req.log?.error({ err: errText }, "Groq API error");
+      res.write(
+        `data: ${JSON.stringify({
+          error: "The assistant is temporarily unavailable. Please use WhatsApp or email for a fast response.",
+        })}\n\n`
+      );
+      res.end();
+      return;
+    }
+
+    const reader = groqResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data:")) continue;
+        const payload = trimmed.replace(/^data:\s*/, "");
+        if (payload === "[DONE]") {
+          res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+          continue;
+        }
+        try {
+          const parsed = JSON.parse(payload);
+          const deltaContent = parsed.choices?.[0]?.delta?.content;
+          if (deltaContent) {
+            res.write(`data: ${JSON.stringify({ content: deltaContent })}\n\n`);
+          }
+        } catch {
+          // ignore stream parse fragments
+        }
+      }
     }
 
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
   } catch (error) {
     req.log?.error({ err: error }, "AI chat request failed");
-    res.write(`data: ${JSON.stringify({ error: "The assistant is temporarily unavailable. Please use WhatsApp or email for a fast response." })}\n\n`);
+    res.write(
+      `data: ${JSON.stringify({
+        error: "The assistant is temporarily unavailable. Please use WhatsApp or email for a fast response.",
+      })}\n\n`
+    );
   } finally {
     res.end();
   }
