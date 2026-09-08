@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
-const model = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ? "gpt-5.6-terra" : "gpt-5.4-mini";
+const model = process.env.OPENAI_MODEL || "llama-3.3-70b-versatile";
 
 const businessContext = `You are ARB Global's website assistant. ARB Global AI & IT Services, founded by Abodh Raj Bhar, delivers AI, enterprise software, cloud, cyber security, fintech, SaaS, and autonomous-agent systems for global businesses.
 
@@ -42,7 +42,7 @@ router.post("/chat", async (req, res) => {
   try {
     const stream = await openai.chat.completions.create({
       model,
-      max_completion_tokens: 8192,
+      max_tokens: 2048,
       stream: true,
       messages: [
         { role: "system", content: businessContext },
