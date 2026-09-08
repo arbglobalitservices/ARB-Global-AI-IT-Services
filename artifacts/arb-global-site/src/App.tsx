@@ -1211,7 +1211,18 @@ function Home() {
       <footer className="footer" id="contact">
         <div className="container-x">
           <div className="footer-main"><div className="footer-copy"><span className="eyebrow">THE NEXT SIGNAL</span><h2>Ready when<br /><span className="gold-text">you are.</span></h2><p>Bring us the hard problem, the ambitious deadline, or the system you know should work better. ARB Global will map the right plan, stack, and next move.</p></div><div className="footer-contact"><a className="contact-item" href="https://wa.me/918127968129" target="_blank" rel="noreferrer" data-testid="link-footer-whatsapp"><MessageCircle size={16} /> WhatsApp support</a><a className="contact-item" href="tel:+918127968129" data-testid="link-footer-phone"><Phone size={16} /> +91 8127968129</a><a className="contact-item" href="mailto:arbglobalitservices@gmail.com" data-testid="link-footer-email"><Mail size={16} /> arbglobalitservices@gmail.com</a><span className="contact-item"><Sparkles size={16} /> Team will call in 60 sec</span></div></div>
-          <div className="footer-bottom"><span>© 2026 ARB GLOBAL AI &amp; IT SERVICES</span><span>AI / CLOUD / AUTONOMOUS SYSTEMS / GLOBAL DELIVERY</span></div>
+          <div className="footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', textAlign: 'center' }}>
+  <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center', fontSize: '0.82rem' }}>
+    <a href="#contact" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Terms &amp; Conditions (Govt &amp; Global)</a>
+    <span style={{ color: '#64748b' }}>•</span>
+    <a href="#contact" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Privacy Policy &amp; DPDP / GDPR</a>
+    <span style={{ color: '#64748b' }}>•</span>
+    <a href="#contact" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Refund &amp; Milestone Policy</a>
+  </div>
+  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '1180px', flexWrap: 'wrap', gap: '8px', fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+    <span>© 2026 ARB GLOBAL AI &amp; IT SERVICES. ALL RIGHTS RESERVED.</span>
+    <span>JURISDICTION: INDIA | GLOBAL CROSS-BORDER ENTERPRISE COMPLIANCE</span>
+  </div>
         </div>
       </footer>
       {selectedPlan && <PaymentModal plan={selectedPlan} onClose={closeModal} />}
