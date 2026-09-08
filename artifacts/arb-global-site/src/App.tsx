@@ -935,7 +935,7 @@ function ChatAssistant() {
     setMessages((current) => [...current, userEntry, assistantEntry]);
 
     try {
-      const response = await fetch(apiUrl('/api/chat'), {
+      const response = await fetch(apiUrl('/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
         body: JSON.stringify({ message: content, history }),
