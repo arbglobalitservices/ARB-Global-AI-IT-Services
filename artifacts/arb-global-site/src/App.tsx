@@ -897,19 +897,31 @@ function Header({ onOpenMenu, menuOpen }: { onOpenMenu: () => void; menuOpen: bo
   onClick={() => navigate('top')} 
   aria-label="ARB Global home" 
   data-testid="button-brand-home"
-  style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+  style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
 >
   <img className="brand-mark" src="/brand/arb-global-logo.jpg" alt="ARB Global AI & IT Services" />
   <span style={{ 
-    fontWeight: 700, 
-    fontSize: '0.95rem', 
-    letterSpacing: '-0.02em', 
-    color: '#ffffff', 
+    fontWeight: 800, 
+    fontSize: '0.98rem', 
+    letterSpacing: '-0.02em',
+    background: 'linear-gradient(90deg, #FFFFFF 0%, #D8B4FE 45%, #C084FC 75%, #A855F7 100%)',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    color: 'transparent',
     display: 'inline-flex', 
     alignItems: 'baseline', 
     whiteSpace: 'nowrap' 
   }}>
-    ARB Global AI &amp; IT Services<span style={{ color: '#a855f7', fontWeight: 800 }}>.</span>
+    ARB Global AI &amp; IT Services
+    <span style={{ 
+      color: '#d946ef', 
+      WebkitTextFillColor: '#d946ef', 
+      fontWeight: 900, 
+      fontSize: '1.25rem',
+      lineHeight: '1',
+      marginLeft: '1px'
+    }}>•</span>
   </span>
 </button>
 
